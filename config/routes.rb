@@ -1,3 +1,7 @@
 Rails.application.routes.draw do
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+  root 'contributors_competition#show'
+  get 'download_certificate',
+      to: 'contributors_competition#download_certificate'
+  get 'download_all_certificates',
+      to: 'contributors_competition#download_all_certificates'
 end

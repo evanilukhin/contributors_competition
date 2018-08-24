@@ -1,0 +1,20 @@
+h1 = 'Contributors Competition'
+.flash-block
+  - flash.each do |_key, value|
+    p= value
+
+.search-form
+  = form_tag(root_path, method: :get) do
+    = 'github.com/'
+    = text_field_tag :repo, params[:repo]
+    = submit_tag 'Search'
+
+- if @winners
+  - @winners.each do |winner|
+    div
+      p.login = winner[:login]
+      p.contributions = winner[:contributions]
+      p.link-to-cert = link_to_download_certificate(winner)
+  = link_to_download_all_certificates(@winners)
+- else
+  p = 'Repository not found'

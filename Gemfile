@@ -27,9 +27,20 @@ gem 'jbuilder', '~> 2.5'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.1.0', require: false
 
-#PDF Generator
+# PDF Generator
 
 gem 'prawn', '>=2.2.2'
+
+# API Client
+
+gem 'rest-client', '~> 1.8'
+
+# Template Engine
+
+gem 'slim-rails', '~> 3.1', '>= 3.1.1'
+
+# Archivator
+gem 'rubyzip', '~> 1.2'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
