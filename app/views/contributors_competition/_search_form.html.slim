@@ -1,0 +1,5 @@
+.search-form
+  = form_tag(results_path, method: :get) do
+    = 'github.com/'
+    = text_field_tag :repository, params[:repository]
+    = submit_tag 'Search'

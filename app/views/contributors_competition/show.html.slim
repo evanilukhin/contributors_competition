@@ -1,20 +1,15 @@
 h1 = 'Contributors Competition'
-.flash-block
-  - flash.each do |_key, value|
-    p= value
 
-.search-form
-  = form_tag(root_path, method: :get) do
-    = 'github.com/'
-    = text_field_tag :repo, params[:repo]
-    = submit_tag 'Search'
+= render 'flash'
+= render 'search_form'
 
-- if @winners
+- if @winners.any?
   - @winners.each do |winner|
     div
       p.login = winner[:login]
       p.contributions = winner[:contributions]
-      p.link-to-cert = link_to_download_certificate(winner)
-  = link_to_download_all_certificates(@winners)
+      p.link-to-cert
+        = link_to_download_certificate(place: winner[:place], repository: @repository)
+  = link_to_download_all_certificates(repository: @repository)
 - else
-  p = 'Repository not found'
+  p = 'Repository not founded'

@@ -33,7 +33,7 @@ gem 'prawn', '>=2.2.2'
 
 # API Client
 
-gem 'rest-client', '~> 1.8'
+gem 'rest-client', '~> 2.0.2'
 
 # Template Engine
 

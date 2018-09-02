@@ -3,12 +3,16 @@
 require 'zip'
 
 class ContributorsCompetitionController < ActionController::Base
-  before_action :fetch_repository, only: :show
-  before_action :prepare_certificate_data, only: :download_certificate
-  before_action :prepare_certificates_data, only: :download_all_certificates
+  before_action :fetch_repository, except: :search
+  before_action :prepare_winner_data, only: :download_certificate
+  before_action :prepare_winners_data, only: %i[show download_all_certificates]
+
+  def search; end
 
   def show
-    nil_redirector(@repository) { @winners = winners(repository: @repository) }
+    nil_redirector(@winners) do
+      @winners
+    end
   end
 
   def download_certificate
@@ -39,7 +43,7 @@ class ContributorsCompetitionController < ActionController::Base
     if variable
       yield
     else
-      redirect_back(fallback_location: root_path,
+      redirect_back(fallback_location: results_path,
                     flash: { error: 'Something went wrong' })
     end
   end
@@ -52,25 +56,47 @@ class ContributorsCompetitionController < ActionController::Base
           zos.write generate_pdf(winner: winner).render
         end
       end
+
     zipped_prints.rewind
     zipped_prints
   end
 
   def fetch_repository
-    @repository = params.fetch(:repo, '')
+    @repository = params.fetch(:repository)
   end
 
-  # Yes, I'm understand that this two functions are very similar.
-  # Certificates must be rendered from data cached on the server,
-  # not from params.
-  def prepare_certificate_data
+  def prepare_winner_data
+    place = params.fetch(:place)&.to_i
     @winner =
-      params.permit(winner: %i[login contributions place]).to_h[:winner]
+      if @repository.present? && place.present?
+        top = top_contributors(repository: @repository)
+        contributor = top.present? ? top[place] : nil
+        if contributor
+          certificate_data(
+            contributor: contributor,
+            place: place
+          )
+        end
+      end
   end
 
-  def prepare_certificates_data
+  def certificate_data(contributor:, place:)
+    {
+      login: contributor['login'],
+      contributions: contributor['contributions'],
+      place: place,
+      repository: @repository
+    }
+  end
+
+  def prepare_winners_data
     @winners =
-      params.permit(winners: %i[login contributions place]).to_h[:winners]
+      if @repository.present?
+        top_contributors = top_contributors(repository: @repository)
+        top_contributors&.each_with_index&.map do |contributor, index|
+          certificate_data(contributor: contributor, place: index)
+        end
+      end
   end
 
   def generate_pdf(winner:)
@@ -79,17 +105,5 @@ class ContributorsCompetitionController < ActionController::Base
 
   def top_contributors(repository:)
     GithubClient.get_contributors(repository: repository)&.first(3)
-  end
-
-  def winners(repository:)
-    if (contributors = top_contributors(repository: repository))
-      contributors.each_with_index.map do |contributor, index|
-        {
-          login: contributor['login'],
-          contributions: contributor['contributions'],
-          place: index + 1
-        }
-      end
-    end
   end
 end
